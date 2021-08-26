@@ -3,6 +3,7 @@ import sqlite3
 import hmac
 from flask_cors import CORS
 from flask_jwt import JWT, current_identity
+# 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
 
 
 class Capstone:
@@ -12,47 +13,49 @@ class Capstone:
 
 
 def sign_up():
-    con = sqlite3.connect("capstone.db")
-    print("Database created successfully")
-    con.execute("CREATE TABLE sign-up("
+    with sqlite3.connect("capstone.db") as con:
+        print("Database created successfully")
+    con.execute("CREATE TABLE IF NOT EXISTS sign_up(user_id INTEGER PRIMARY KEY AUTOINCREMENT,"
                 "first_name TEXT NOT NULL,"
                 "last_name TEXT NOT NULL,"
-                "email TEXT NOT NULL,"
                 "username TEXT NOT NULL,"
-                "password TEXT NOT NULL) ")
-    print("Sign-in table created")
-    con.close()
+                "password TEXT NOT NULL, "
+                "email TEXT NOT NULL,"
+                " phone INT NOT NULL)")
+    print("Signup table created successfully")
+
 
 
 def login():
-    con = sqlite3.connect("capstone.db")
-    con.execute("CREATE TABLE login(id PRIMARY KEY,"
-                "username TEXT NOT NULL,"
-                "password TEXT NOT NULL) ")
+    with sqlite3.connect("capstone.db") as con:
+        con.execute("CREATE TABLE IF NOT EXISTS login(id PRIMARY KEY,"
+                    "username TEXT NOT NULL,"
+                    "password TEXT NOT NULL) ")
     print("Login table created")
-    con.close()
+
 
 
 def client():
-    con = sqlite3.connect("capstone.db")
-    con.execute("CREATE TABLE CLIENTS"
-                "([generated_id] INTEGER PRIMARY KEY,"
-                "[Client_Name] text,"
-                "[Country_ID] integer,"
-                "[Date] date)")
+    with sqlite3.connect("capstone.db") as con:
+        con.execute("CREATE TABLE IF NOT EXISTS CLIENTS(Pay_id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                    "CST_id INT NOT NULL,"
+                    "Name_of_customer TEXT NOT NULL,"
+                    "total_amount TXT NOT NULL,"
+                    "payment REAL)")
+        print("Client table created")
 
-    print("Client table created")
-    con.close()
 
 
 def location():
-    con = sqlite3.connect("capstone.db")
-    con.execute('''CREATE TABLE COUNTRY
-             ([generated_id] INTEGER PRIMARY KEY,
-             [Country_ID] integer,
-             [Country_Name] text)''')
-    print("Location table created")
-    con.close()
+    with sqlite3.connect("capstone.db") as con:
+        con.execute("CREATE TABLE  IF NOT EXISTS country(id Primary Key AUTOINCREMENT,"
+                    "name_of_continent TEXT NOT NULL,"
+                    "name_of_country TEXT NOT NULL,"
+                    "days_of_trip INTEGER,"
+                    "date DATE,"
+                    "time TIME)")
+        print("Location table created")
+
 
 
 sign_up()
@@ -68,6 +71,7 @@ def authenticate(username, password):
 
 
 def identity(payload):
+
     id = payload['identity']
     return id.get(id, None)
 
@@ -84,9 +88,17 @@ def protected():
     return '%s' % current_identity
 
 
-@app.route('/sign-up', methods=["POST"])
+@app.route('/sign-up', methods=["POST", "GET"])
 def sign_up():
     response = {}
+
+    if request.method == "GET":
+        response["data"] = "You have a working GET method"
+        response["user"] = {
+            "name": "Karabo",
+            "email": "karabo@gmail.com"
+        }
+        return response
 
     if request.method == "POST":
         first_name = request.form['first_name']
@@ -114,13 +126,19 @@ def insert_location():
     response = {}
 
     if request.method == "POST":
-        generated_id = request.form['generated_id']
-        Country_ID = request.form['Country_ID']
-        Country_Name = request.form['Country_Name']
+        name_of_continent = request.form['name_of_continent']
+        name_of_country = request.form['name_of_country']
+        days_of_trip = request.form['days_of_trip']
+        date = request.form['date']
+        time = request.form['time']
 
     with sqlite3.connect('capstone.db') as con:
         cursor = con.cursor()
-        cursor.execute("INSERT INTO location("" ) VALUES(?, ?, ?)", (generated_id, Country_ID, Country_Name))
+        cursor.execute("INSERT INTO location ("
+                       "name_of_continent,"
+                       "name_of_country,"
+                       "days_of_trip,date,"
+                       "time) VALUES(?, ?, ?,?,?)", (name_of_continent, name_of_country, days_of_trip, date, time))
         con.commit()
         response["status_code"] = 201
         response['description'] = "Inserted location successfully"
