@@ -3,7 +3,7 @@ import sqlite3
 import hmac
 from flask_cors import CORS
 from flask_jwt import JWT, current_identity
-# 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
+# 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
 
 
 class Capstone:
@@ -25,14 +25,12 @@ def sign_up():
     print("Signup table created successfully")
 
 
-
 def login():
     with sqlite3.connect("capstone.db") as con:
         con.execute("CREATE TABLE IF NOT EXISTS login(id PRIMARY KEY,"
                     "username TEXT NOT NULL,"
                     "password TEXT NOT NULL) ")
     print("Login table created")
-
 
 
 def client():
