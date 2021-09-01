@@ -1,9 +1,10 @@
-from flask import Flask, request,jsonify
+from flask import Flask, request, jsonify
 import sqlite3
 import hmac
 from flask_cors import CORS
 from flask_jwt import JWT, current_identity
 # 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
+from gunicorn.config import User
 
 
 class Capstone:
@@ -23,6 +24,15 @@ def sign_up():
                 "email TEXT NOT NULL,"
                 "phone INT NOT NULL)")
     print("Signup table created successfully")
+
+def user_table():
+    with sqlite3.connect("capstone.db") as con:
+        con.execute("CREATE TABLE IF NOT EXISTS users(user_id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                 "first_name TEXT NOT NULL,"
+                 "last_name TEXT NOT NULL,"
+                 "username TEXT NOT NULL,"
+                 "password TEXT NOT NULL, address TEXT NOT NULL, phone_number INT NOT NULL, user_email TEXT NOT NULL)")
+        print("user table created successfully")
 
 
 def login():
@@ -54,16 +64,35 @@ def location():
 
 
 sign_up()
+user_table()
 login()
 client()
 location()
 
 
-def authenticate(username, password):
-    username = username.get(username, None)
-    if username and hmac.compare_digest(username.password.encode('utf-8'), password.encode('utf-8')):
-        return username
+def fetch_users():
+    with sqlite3.connect('capstone.db') as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM user")
 
+        users = cursor.fetchall()
+
+        new_data = []
+
+        for data in users:
+            new_data.append(User(data[0], data[3], data[4]))
+    return new_data
+
+users = fetch_users()
+
+username_table = {u.username: u for u in users}
+userid_table = {u.id: u for u in users}
+
+
+def authenticate(username, password, use=None):
+    user = username_table.get(username, None)
+    if user and hmac.compare_digest(user.password.encode('utf-8'), password.encode('utf-8')):
+        return use
 
 def identity(payload):
 
@@ -165,7 +194,7 @@ def all_users():
     with sqlite3.connect("capstone.db") as conn:
         cursor = conn.cursor()
         cursor.row_factory = sqlite3.Row
-        cursor.execute("SELECT * FROM login")
+        cursor.execute("SELECT * FROM users")
         posts = cursor.fetchall()
         accumulator = []
         for i in posts:
