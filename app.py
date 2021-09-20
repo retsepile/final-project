@@ -48,7 +48,7 @@ def client():
 
 def location():
     with sqlite3.connect("capstone.db") as con:
-        con.execute("CREATE TABLE  IF NOT EXISTS country(id Primary Key,"
+        con.execute("CREATE TABLE  IF NOT EXISTS country(id INTEGER PRIMARY KEY AUTOINCREMENT,"
                     "name_of_continent TEXT NOT NULL,"
                     "name_of_country TEXT NOT NULL,"
                     "price TEXT NOT NULL,"
@@ -172,15 +172,15 @@ def insert_location():
 
 
 @app.route('/payment/', methods=["POST", "GET"])
-def payment():
+def payment_of_place():
     response = {}
 
     if request.method == "POST":
-        name_of_customer = request.form['name_of_customer']
-        days_of_trip = request.form['days_of_trip']
-        payment = request.form['payment']
-        date = request.form['date']
-        time = request.form['time']
+        name_of_customer = request.json['name_of_customer']
+        days_of_trip = request.json['days_of_trip']
+        payment = request.json['payment']
+        date = request.json['date']
+        time = request.json['time']
 
         with sqlite3.connect('capstone.db') as conn:
             cursor = conn.cursor()
@@ -192,7 +192,7 @@ def payment():
                            "time_made) VALUES(?, ?, ?, ?, ?)", (name_of_customer, days_of_trip, payment, date, time))
             conn.commit()
             response["status_code"] = 201
-            response['description'] = "payment successfully"
+            response['description'] = "payment successful"
         return response
 
     if request.method == "GET":
