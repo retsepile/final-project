@@ -131,7 +131,7 @@ def sign_up():
         with sqlite3.connect("capstone.db") as con:
             cursor = con.cursor()
             cursor.execute("SELECT * FROM sign_up WHERE username=? AND password=?", (username, password))
-            login = cursor.fetchall()
+            login = cursor.fetchone()
             response['status_code'] = 200
             response['data'] = login
         return response
