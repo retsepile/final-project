@@ -1,5 +1,6 @@
 # Retsepile Koloko
 # Classroom 2
+# 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
 from flask import Flask, request
 import sqlite3
 import hmac
@@ -32,6 +33,7 @@ def login():
                     "password TEXT NOT NULL) ")
     print("Login table created")
     con.commit()
+
 
 def client():
     with sqlite3.connect("capstone.db") as con:
@@ -87,47 +89,51 @@ def protected():
 @app.route('/sign-up', methods=["POST", "GET", "PATCH"])
 def sign_up():
     response = {}
-
+    # registration
     if request.method == "POST":
-        first_name = request.form['first_name']
-        last_name = request.form['last_name']
-        email = request.form['email']
-        username = request.form['username']
-        password = request.form['password']
+        try:
+            first_name = request.json['first_name']
+            last_name = request.json['last_name']
+            email = request.json['email']
+            username = request.json['username']
+            password = request.json['password']
 
-        with sqlite3.connect('capstone.db') as con:
-            cursor = con.cursor()
-            cursor.execute("INSERT INTO sign_up ("
-                           "first_name,"
-                           "last_name,"
-                           "email,"
-                           "username,"
-                           "password) VALUES(?, ?, ?, ?, ?)",
-                           (first_name, last_name, email, username, password))
-            con.commit()
-            response['message'] = "sign up successful"
-            return response
-    # login route
-    if request.method == "PATCH":
-        username = request.form["username"]
-        password = request.form["password"]
+            with sqlite3.connect('capstone.db') as con:
+                cursor = con.cursor()
+                cursor.execute("INSERT INTO sign_up ("
+                               "first_name,"
+                               "last_name,"
+                               "email,"
+                               "username,"
+                               "password) VALUES(?, ?, ?, ?, ?)",
+                               (first_name, last_name, email, username, password))
+                con.commit()
+                response['message'] = "sign up successful"
+        except ValueError:
+            response["message"] = "Error in registration"
+        return response
 
-        with sqlite3.connect("capstone.db") as con:
-            cursor = con.cursor()
-            cursor.execute("SELECT * FROM sign_up WHERE username=? AND password=?", (username, password))
-
-
-@app.route('/show-users/', methods=['GET'])
-def show_all_users():
-    response = {}
     if request.method == "GET":
         with sqlite3.connect("capstone.db") as con:
             cursor = con.cursor()
-            cursor.execute("SELECT * sign_up ")
+            cursor.execute("SELECT * FROM sign_up")
             sign_up = cursor.fetchall()
 
         response['status_code'] = 200
         response['data'] = sign_up
+        return response
+
+    # login route
+    if request.method == "PATCH":
+        username = request.json["username"]
+        password = request.json["password"]
+
+        with sqlite3.connect("capstone.db") as con:
+            cursor = con.cursor()
+            cursor.execute("SELECT * FROM sign_up WHERE username=? AND password=?", (username, password))
+            login = cursor.fetchall()
+            response['status_code'] = 200
+            response['data'] = login
         return response
 
 
