@@ -37,12 +37,11 @@ def login():
 
 def client():
     with sqlite3.connect("capstone.db") as con:
-        con.execute("CREATE TABLE IF NOT EXISTS clients (user_id INTEGER PRIMARY KEY AUTOINCREMENT,"
-                    "name_of_customer TEXT NOT NULL,"
-                    "days_of_trip INTEGER,"
-                    "payment TEXT NOT NULL,"
-                    "date_made DATE,"
-                    "time_made TIME)")
+        con.execute("CREATE TABLE IF NOT EXISTS clients (booking_id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                    "user_id TEXT NOT NULL,"
+                    "from_date INTEGER,"
+                    "to_date INTEGER,"
+                    "payment TEXT NOT NULL)")
         print("Client table created")
 
 
@@ -136,9 +135,10 @@ def sign_up():
             response['data'] = login
         return response
 
+# route for fetching the places
+
 
 @app.route('/location/', methods=["POST", "GET"])
-# @jwt_required()
 def insert_location():
     response = {}
 
@@ -170,26 +170,26 @@ def insert_location():
         response['data'] = country
         return response
 
+# payment process
+
 
 @app.route('/payment/', methods=["POST", "GET"])
 def payment_of_place():
     response = {}
 
     if request.method == "POST":
-        name_of_customer = request.json['name_of_customer']
-        days_of_trip = request.json['days_of_trip']
+        user_id = request.json['user_id']
+        from_date = request.json['from_date']
+        to_date = request.json['to_date']
         payment = request.json['payment']
-        date = request.json['date']
-        time = request.json['time']
 
         with sqlite3.connect('capstone.db') as conn:
             cursor = conn.cursor()
             cursor.execute("INSERT INTO clients("
-                           "name_of_customer,"
-                           "days_of_trip,"
-                           "payment,"
-                           "date_made,"
-                           "time_made) VALUES(?, ?, ?, ?, ?)", (name_of_customer, days_of_trip, payment, date, time))
+                           "user_id,"
+                           "from_date,"
+                           "to_date,"
+                           "payment ) VALUES(?, ?, ?, ?)", (user_id, from_date, to_date, payment))
             conn.commit()
             response["status_code"] = 201
             response['description'] = "payment successful"
@@ -206,50 +206,37 @@ def payment_of_place():
         return response
 
 
-#@app.route("/delete/<int:user_id>", method=["GET"])
-#def get_user(user_id):
- #   response = {}
-  #  with sqlite3.connect("capstone.db") as con:
-#        cursor = con.cursor()
- #       cursor.execute("SELECT * FROM sign-up WHERE user_id AND password" +(user_id))
-  #      con = cursor.fetchone()
+# @app.route("/booking/<int:user_id>", methods=["POST"])
+# def booking(user_id):
+#  response = {}
+# user_id = user_id
+    # name_of_customer = request.form['name_of_customer']
+    # days_of_trip = request.form['days_of_trip']
+    # payment = request.form['payment']
+    # date = request.form['date']
+    # time = request.form['time']
 
-#        response['status_code'] = 200
- #       response['data'] = con
-  #      return response
-
-
-@app.route("/booking/<int:user_id>", methods=["POST"])
-def booking(user_id):
-    response = {}
-    user_id = user_id
-    name_of_customer = request.form['name_of_customer']
-    days_of_trip = request.form['days_of_trip']
-    payment = request.form['payment']
-    date = request.form['date']
-    time = request.form['time']
-
-    if request.method == "POST":
-        with sqlite3.connect("capstone.db") as con:
-            cursor = con.cursor()
-            cursor.execute("INSERT INTO client ("
-                           "user_id"
-                           "name_of_customer,"
-                           "days_of_trip,"
-                           "payment,"
-                           "date,"
-                           "time) VALUES(?, ?, ?, ?, ?)", (user_id, name_of_customer, days_of_trip, payment, date, time))
-            con.commit()
-            response["message"] = "boooking made successful"
-            response["status_code"] = 200
-            response['data'] = {
-                "user_id": user_id,
-                "name_of_customer": name_of_customer,
-                "days_of_trip": days_of_trip,
-                "payment ": payment,
-                'date': date,
-                "time": time
-            }
+    # if request.method == "POST":
+#  with sqlite3.connect("capstone.db") as con:
+#     cursor = con.cursor()
+#    cursor.execute("INSERT INTO client ("
+#                  "user_id"
+#                 "name_of_customer,"
+#                "days_of_trip,"
+#               "payment,"
+#              "date,"
+#       "time) VALUES(?, ?, ?, ?, ?)", (user_id, name_of_customer, days_of_trip, payment, date, time))
+# con.commit()
+# response["message"] = "boooking made successful"
+# response["status_code"] = 200
+# response['data'] = {
+#   "user_id": user_id,
+#  "name_of_customer": name_of_customer,
+# "days_of_trip": days_of_trip,
+# "payment ": payment,
+# 'date': date,
+# "time": time
+# }
 
 
 if __name__ == '__main__':
