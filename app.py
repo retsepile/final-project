@@ -192,7 +192,7 @@ def payment_of_place():
                            "payment ) VALUES(?, ?, ?, ?)", (user_id, from_date, to_date, payment))
             conn.commit()
             response["status_code"] = 201
-            response['description'] = "payment successful"
+            response['description'] = "booking successful"
         return response
 
     if request.method == "GET":
